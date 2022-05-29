@@ -183,7 +183,7 @@ def initialhome():
 
             popular = pickle.load(open('nes.pkl', 'rb'))
             popularmovie = pd.DataFrame(popular)
-            similarity = pickle.load(open('sim.pkl', 'rb'))
+            similarity = pickle.load(open('similarity.pkl', 'rb'))
             selected_movie_name = st.selectbox(
                 '                  ',
                 movies['title'].values)
@@ -469,7 +469,7 @@ def loginhome(username):
     movies = pd.DataFrame(movies_list)
     popular = pickle.load(open('nes.pkl', 'rb'))
     popularmovie = pd.DataFrame(popular)
-    similarity = pickle.load(open('sim.pkl', 'rb'))
+    similarity = pickle.load(open('similarity.pkl', 'rb'))
     genre = pickle.load(open('genres.pkl', 'rb'))
     genres = pd.DataFrame(genre)
     cast = pickle.load(open('cast.pkl', 'rb'))
