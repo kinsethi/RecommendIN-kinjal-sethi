@@ -1,12 +1,13 @@
 import json
 import streamlit as st #imported streamlit python pacckage
+import gzip
 import pickle
 import pandas as pd
 import requests
 from PIL import Image
 import hashlib
 import sqlite3
-from streamlit_option_menu import option_menu
+# from streamlit_option_menu import option_menu
 import hydralit_components as hc
 from streamlit_lottie import st_lottie
 
@@ -75,31 +76,139 @@ def view_all_users():
 
 #main function for the home page
 def initialhome():
+
+    # def load_lottiefile(filepath: str):
+    #     with open(filepath, "r") as f:
+    #         return json.load(f)
+
+    def aboutUs():  # about us section telling about the app
+        st.title('About Us')
+        st.write('''
+        RecommendIn is a MOVIE recommendation system which recommends you according to your choice.
+        It is totally user friendly and it is for helping our users to find their movies according to their tastes.   
+        we recommend you movies according to three algorithms that are weighted hybrid , weighted average and nearest 
+        neighour. our website provides you with different recommendations like recommending on the basis of your choice,
+        people recommendation, according to genre, cast, crew, release_date, popularity etc. We also provide astonishing 
+        features like telling you about upcoming movies and recommending the best for the same.
+        We have different features like subscribe button which will allow you to get notifications whenever best 
+        recommendations come your way.
+        It is a fully functional website which solves your problem  "Which movie is next"?         
+        ''')
+
+        # Lottie Files: https://lottiefiles.com/
+        # animation
+
+        # lottie_coding = load_lottiefile("9103-entertainment.json")  # replace link to local lottie file
+        lottie_hello = load_lottieurl("https://assets8.lottiefiles.com/packages/lf20_CTaizi.json")
+
+        st_lottie(
+            lottie_hello,
+            speed=1,
+            reverse=False,
+            loop=True,
+            quality="low",  # medium ; high
+
+            height=200,
+            width=200,
+            key=None,
+        )
+
+    def contactUs():  # contact us section telling about the app
+        # contact us
+        st.title('Contact Us')
+        st.write('''
+        If you have general questions about your account or how to contact customer service for assistance, 
+        please visit our online help center at help.recommendin.com. For questions specifically about this Privacy Statement, 
+        or our use of your personal information, cookies or similar technologies, please contact our Data Protection Officer/Privacy
+        Office by email at privacy@recommendin.com
+
+        The data controller of your personal information is recommendin Entertainment Services India LLP. 
+        Please note that if you contact us to assist you, for your safety and ours we may need to authenticate your 
+        identity before fulfilling your request.
+
+        Contact_no: 1-2093847
+        Email: RecommendIn@gmail.com
+        ''')
+        # animation for contact us section
+
+        # lottie_coding = load_lottiefile("63228-man-watching-a-movie.json")  # replace link to local lottie file
+        lottie_hello = load_lottieurl("https://assets8.lottiefiles.com/packages/lf20_qm8eqzse.json")
+
+        st_lottie(
+            lottie_hello,
+            speed=1,
+            reverse=False,
+            loop=True,
+            quality="low",  # medium ; high
+            # canvas
+            height=200,
+            width=200,
+            key=None,
+        )
+
+    def load_lottieurl(url: str):
+        r = requests.get(url)
+        if r.status_code != 200:
+            return None
+        return r.json()
     with st.container():
-        st.markdown("<h4 style='text-align: right; color: purple;'>New User</h4> ",
-                    unsafe_allow_html=True)
         with st.container():
             movies_list = pickle.load(open('movie_list.pkl', 'rb'))
             movies = pd.DataFrame(movies_list)
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.empty()
+            with col2:
+                # lottie_coding = load_lottiefile("4434-loading.json")  # replace link to local lottie file
+                lottie_hello = load_lottieurl("https://assets7.lottiefiles.com/temp/lf20_NjaR5i.json")
+
+                st_lottie(
+                    lottie_hello,
+                    speed=1,
+                    reverse=False,
+                    loop=False,
+                    quality="medium",  # medium ; high
+
+                    height=300,
+                    width=300,
+                    key=None,
+                )
+            with col3:
+              st.empty()
+
+
+
             st.title('Welcome To RecommendIn')
+
             popular = pickle.load(open('nes.pkl', 'rb'))
             popularmovie = pd.DataFrame(popular)
-            similarity = pickle.load(open('similarity.pkl', 'rb'))
+            similarity = pickle.load(open('sim.pkl', 'rb'))
             selected_movie_name = st.selectbox(
                 '                  ',
                 movies['title'].values)
             st.button('Recommend',disabled=True)
             st.markdown("Kindly Login to use our services")
 
+            imgs = Image.open('movie.jpg')
+            st.image(imgs, width=1300)
+            aboutUs()
+            contactUs()
+
 #login in home
 def loginhome(username):
-    def fetch_poster(movie_id): #fetching posters for recommended movies
-        response = requests.get(
-            'https://api.themoviedb.org/3/movie/{''}?api_key=6aa985dbeded2bc870b63cd6692f4eb6&language=en-US'.format(
-                movie_id))
-        data = response.json()
-        return "https://image.tmdb.org/t/p/w200/" + data['poster_path']
-
+    def fetch_poster(movie_id):  # fetching posters for recommended movies
+        try:
+            response = requests.get(
+                'https://api.themoviedb.org/3/movie/{''}?api_key=6aa985dbeded2bc870b63cd6692f4eb6&language=en-US'.format(
+                    movie_id))
+            data = response.json()
+            # if response == "<Response [200]>" :
+            #     return "q"
+            # else:
+            return "https://image.tmdb.org/t/p/w200" + data["poster_path"]
+        except:
+            return ""
     def fetch_title(movie_id): #fetching titles for recommended movies
         response = requests.get(
             'https://api.themoviedb.org/3/movie/{''}?api_key=6aa985dbeded2bc870b63cd6692f4eb6&language=en-US'.format(
@@ -119,21 +228,35 @@ def loginhome(username):
     def print(name, poster):  # setting column spaces for recommended movies
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
-            st.text(name[0])
-            st.image(poster[0])
+            if poster[0] != "":
+                st.text(name[0])
+                st.image(poster[0])
+            else:
+                return
         with col2:
-            st.text(name[1])
-            st.image(poster[1])
+            if poster[1] != "":
+                st.text(name[1])
+                st.image(poster[1])
+            else:
+                return
         with col3:
-            st.text(name[2])
-            st.image(poster[2])
+            if poster[2] != "":
+                st.text(name[2])
+                st.image(poster[2])
+            else:
+                return
         with col4:
-            st.text(name[3])
-            st.image(poster[3])
+            if poster[3] != "":
+                st.text(name[3])
+                st.image(poster[3])
+            else:
+                return
         with col5:
-            st.text(name[4])
-            st.image(poster[4])
-
+            if poster[4] != "":
+                st.text(name[4])
+                st.image(poster[4])
+            else:
+                return
     def load_lottiefile(filepath: str):
         with open(filepath, "r") as f:
             return json.load(f)
@@ -271,9 +394,6 @@ def loginhome(username):
             width=200,
             key=None,
         )
-
-
-
     def contactUs():  # contact us section telling about the app
         # contact us
         st.title('Contact Us')
@@ -349,7 +469,7 @@ def loginhome(username):
     movies = pd.DataFrame(movies_list)
     popular = pickle.load(open('nes.pkl', 'rb'))
     popularmovie = pd.DataFrame(popular)
-    similarity = pickle.load(open('similarity.pkl', 'rb'))
+    similarity = pickle.load(open('sim.pkl', 'rb'))
     genre = pickle.load(open('genres.pkl', 'rb'))
     genres = pd.DataFrame(genre)
     cast = pickle.load(open('cast.pkl', 'rb'))
@@ -431,13 +551,13 @@ def loginhome(username):
                 genreRecommend('Drama',fetch_genreid('Drama'))   # Drama Movies
                 genreRecommend('Comedy',fetch_genreid('Comedy')) # Comedy Movies
                 genreRecommend('Horror',fetch_genreid('Horror')) # Horror Movies
-                genreRecommend('Romance',fetch_genreid('Romance')) # Romance Movies
+                genreRecommend('Romance',fetch_genreid('Romance')) # Romance
+                upcomingMovie()
                 aboutUs()
                 contactUs()
             elif menu_id == "Most Watched Movies":
                 st.title("Most Watched Movies")
-                mnames, mposters = popularmovies()
-                print(mnames,mposters)
+                popularmovies()
             elif menu_id == "Category":
                 genreRecommend('Action',fetch_genreid('Action')) # Action Movies
                 genreRecommend('Drama',fetch_genreid('Drama'))
@@ -480,7 +600,11 @@ def main(user):
                 st.session_state.key = True
 
             else:
-                st.warning("Incorrect Username/Password")
+                def header(url):
+                    st.markdown(
+                        f'<p style="background-color:#c0d934;color:#0e0e0e;font-size:24px;border-radius:2%;">{url}</p>',
+                        unsafe_allow_html=True)
+                header("Incorrect Password")
     elif choice == "SignUp":
         st.subheader("Create New Account")
         new_user = st.text_input("Username")
@@ -489,8 +613,13 @@ def main(user):
         if st.button("Signup"):
             create_usertable()
             add_userdata(new_user, make_hashes(new_password))
-            st.success("You have successfully created a valid Account")
-            st.info("Go to Login Menu to login")
+
+            def header(url):
+                st.markdown(
+                    f'<p style="background-color:#aa5ed4;color:#0e0e0e;font-size:24px;border-radius:2%;">{url}</p>',
+                    unsafe_allow_html=True)
+            header("You have successfully created a valid Account")
+            header("Go to Login Menu to login")
 
 
 main(user)
